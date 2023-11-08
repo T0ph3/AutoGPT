@@ -84,6 +84,7 @@ class Battleship(AbstractBattleship):
 
         if not game:
             raise ValueError(f"Game with ID {game_id} not found.")
+
         if placement.direction not in ["horizontal", "vertical"]:
             raise ValueError("Invalid ship direction")
         if self.all_ships_placed(game):
@@ -110,6 +111,8 @@ def create_ship_placement(self, game_id: str, placement: ShipPlacement) -> None:
 The new code will be inserted after the matching lines:
 ```python
 def create_ship_placement(self, game_id: str, placement: ShipPlacement) -> None:
+    game = self.games.get(game_id)
+
     if not game:
         raise ValueError(f"Game with ID {game_id} not found.")
 
