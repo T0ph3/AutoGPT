@@ -29,7 +29,7 @@ This simple approach works quite robustly on all benchmarks except `Battleship` 
 If there are tests linked to a task, they will be run after the code has been written.
 The results of these are parsed into a more concise format to reduce context length.
 
-#### Exempel
+#### Example
 The following output is from `pytest`:
 
 ```
@@ -80,17 +80,49 @@ class Battleship(AbstractBattleship):
     # ... rest of the code ... 
     
     def create_ship_placement(self, game_id: str, placement: ShipPlacement) -> None:
-        game = self.get_game(game_id)
+        game = self.games.get(game_id)
+
         if not game:
-            raise ValueError("Game not found")
-    
-        if len(game.ships) == 5:
+            raise ValueError(f"Game with ID {game_id} not found.")
+        if placement.direction not in ["horizontal", "vertical"]:
+            raise ValueError("Invalid ship direction")
+        if self.all_ships_placed(game):
             raise ValueError("All ships are already placed. Cannot place more ships.")
-        
+
         # ... rest of the code
 
     # ... rest of the code ... 
 ```
+
+If the original method starts like this:
+```python
+def create_ship_placement(self, game_id: str, placement: ShipPlacement) -> None:
+    game = self.games.get(game_id)
+
+    if not game:
+        raise ValueError(f"Game with ID {game_id} not found.")
+   
+    ship_length = self.SHIP_LENGTHS.get(placement.ship_type)
+    if not ship_length:
+            raise ValueError(f"Invalid ship type {placement.ship_type}")
+```
+
+The new code will be inserted after the matching lines:
+```python
+def create_ship_placement(self, game_id: str, placement: ShipPlacement) -> None:
+    if not game:
+        raise ValueError(f"Game with ID {game_id} not found.")
+
+    if placement.direction not in ["horizontal", "vertical"]:
+        raise ValueError("Invalid ship direction")
+    if self.all_ships_placed(game):
+        raise ValueError("All ships are already placed. Cannot place more ships.")
+
+    ship_length = self.SHIP_LENGTHS.get(placement.ship_type)
+    if not ship_length:
+            raise ValueError(f"Invalid ship type {placement.ship_type}")
+```
+
 
 This code is parsed into "code blocks" and compared to code blocks from the original file.
 
